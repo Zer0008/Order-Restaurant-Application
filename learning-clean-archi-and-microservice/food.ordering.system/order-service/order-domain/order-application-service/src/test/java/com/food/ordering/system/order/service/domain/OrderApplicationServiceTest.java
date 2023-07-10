@@ -50,14 +50,14 @@ public class OrderApplicationServiceTest {
     private RestaurantRepository restaurantRepository;
 
     private CreateOrderCommand createOrderCommand;
-    private CreateOrderCommand createOrderCommandWrongPrice;
+    private CreateOrderCommand createOrderCommandWrongTotalPrice;
     private CreateOrderCommand createOrderCommandWrongProductPrice;
 
     private final UUID CUSTOMER_ID = UUID.fromString("68507fb6-ba24-401d-a020-6a72e7c23697");
     private final UUID RESTAURANT_ID = UUID.fromString("47dcdce8-2b23-4c32-9dc1-34347a60e953");
     private final UUID PRODUCT_ID = UUID.fromString("aa1e4928-ba1f-41e6-a7e1-10b0ad7862f4");
     private final UUID ORDER_ID = UUID.fromString("346fad4d-ab2d-49cc-bc52-8641807a41f0");
-    private final BigDecimal PRICE = new BigDecimal("200.00");
+    private final BigDecimal PRICE = new BigDecimal("100.00");
 
     @BeforeAll
     public void init() {
@@ -85,7 +85,7 @@ public class OrderApplicationServiceTest {
                         ))
                 .build();
 
-        createOrderCommandWrongPrice = CreateOrderCommand.builder()
+        createOrderCommandWrongTotalPrice = CreateOrderCommand.builder()
                 .customerId(CUSTOMER_ID)
                 .restaurantId(RESTAURANT_ID)
                 .address(OrderAddress.builder()
@@ -109,7 +109,7 @@ public class OrderApplicationServiceTest {
                 ))
                 .build();
 
-        createOrderCommand = CreateOrderCommand.builder()
+        createOrderCommandWrongProductPrice = CreateOrderCommand.builder()
                 .customerId(CUSTOMER_ID)
                 .restaurantId(RESTAURANT_ID)
                 .address(OrderAddress.builder()
@@ -126,7 +126,7 @@ public class OrderApplicationServiceTest {
                                 .build(),
                         OrderItem.builder()
                                 .productId(PRODUCT_ID)
-                                .quantity(1)
+                                .quantity(3)
                                 .price(new BigDecimal("50.00"))
                                 .subTotal(new BigDecimal("150.00"))
                                 .build()
@@ -157,15 +157,15 @@ public class OrderApplicationServiceTest {
     public void createOrderTest() {
         CreateOrderResponse createOrderResponse = orderApplicationService.createOrder(createOrderCommand);
         Assertions.assertEquals(OrderStatus.PENDING, createOrderResponse.getOrderStatus());
-        Assertions.assertEquals("Order Create Successfully", createOrderResponse.getMessage());
+        Assertions.assertEquals("Order Created Successfully!", createOrderResponse.getMessage());
         Assertions.assertNotNull(createOrderResponse.getOrderTrackingId());
     }
 
     @Test
     public void createOrderWithWrongTotalPrice() {
         OrderDomainException orderDomainException = Assertions.assertThrows(OrderDomainException.class,
-                () -> orderApplicationService.createOrder(createOrderCommandWrongPrice));
-        Assertions.assertEquals("Total price: 250.00 is not equal to order items total: 200.00!",
+                () -> orderApplicationService.createOrder(createOrderCommandWrongTotalPrice));
+        Assertions.assertEquals("Total price: 250.00 is not equal to order items total: 100.00!",
                 orderDomainException.getMessage());
     }
 
